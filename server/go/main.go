@@ -9,54 +9,68 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var clients = make(map[*websocket.Conn]bool)
+var broadcast = make(chan Message)
 var upgrader = websocket.Upgrader{}
-var messages = []Message{{"markelca", "foo"}, {"johnhoo", "rustacean"}}
 
 type Message struct {
     Sender  string `json:"sender"`
     Content string `json:"content"`
 }
 
+var messages = []Message{{"markelca", "foo"}, {"johnhoo", "rustacean"}}
 
 func main() {
     http.HandleFunc("/list", listMessages)
-    http.HandleFunc("/add", addMessage)
-    http.ListenAndServe(":8080", nil)
+    http.HandleFunc("/add", handleWebSocket)
+    go handleMessages()
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func listMessages(w http.ResponseWriter, r *http.Request)  {
+    w.Header().Add("Access-Control-Allow-Origin", "*")
     messagesBytes, jsonErr := json.Marshal(messages)
     if jsonErr != nil {
         log.Println("JSON marshal failed:", jsonErr)
+        fmt.Fprintf(w, "Error listing the messages")
         return
     }
     fmt.Fprint(w, string(messagesBytes))
 }
 
-
-func addMessage(w http.ResponseWriter, r *http.Request) {
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
-        log.Print("upgrade failed: ", err)
+        log.Println("Error upgrading connection:", err)
         return
     }
+    defer conn.Close()
+
+    clients[conn] = true
 
     for {
-        _, input, err := conn.ReadMessage()
+        var msg Message
+        err := conn.ReadJSON(&msg)
         if err != nil {
-            log.Println("read failed:", err)
+            log.Println("Error reading message:", err)
+            delete(clients, conn)
             break
         }
-        log.Printf("Received message: %s", string(input))
-
-        var data Message
-        jsonErr := json.Unmarshal(input, &data)
-        if jsonErr != nil {
-            log.Println("Error: {}", jsonErr)
-            return
-        }
-        messages = append(messages, data)
-        log.Println(messages)
+        broadcast <- msg
     }
-
 }
+
+func handleMessages() {
+    for {
+        msg := <-broadcast
+        for conn := range clients {
+            err := conn.WriteJSON(msg)
+            if err != nil {
+                log.Println("Error writing message:", err)
+                conn.Close()
+                delete(clients, conn)
+            }
+        }
+    }
+}
+

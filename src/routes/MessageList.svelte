@@ -1,4 +1,5 @@
 <script>
+    import { onMount } from 'svelte';
     import {messages} from './stores.js'
 
     let messageList;
@@ -6,6 +7,13 @@
     messages.subscribe((value) => {
         messageList = value
     })
+
+    onMount(async () => {
+        const res = await fetch('http://127.0.0.1:8000/list');
+        messageList = await res.json();
+    });
+
+
 
 </script>
 
