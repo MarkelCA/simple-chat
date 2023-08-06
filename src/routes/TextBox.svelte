@@ -6,7 +6,7 @@
     let socket
 
     onMount(() => {
-        socket = new WebSocket("ws://localhost:8080/add");
+        socket = new WebSocket(`ws://localhost:${import.meta.env.VITE_SERVER_PORT}/add`);
         socket.addEventListener("message", (event) => {
             messages.update((currentValue) =>{
                 const newMessage = JSON.parse(event.data)

@@ -14,7 +14,7 @@ cd simple-chat
 ```bash
 cp .env.sample .env
 ```
-Edit the .envs file with the desired parameters
+Edit the .envs file with the desired parameters. You'll have to change the variables inside the <> chars. **Don't change the already defined ones, like the `VITE_SERVER_PORT`**
 
 ## Frontend
 (From the root folder)

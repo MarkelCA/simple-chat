@@ -9,9 +9,8 @@
     })
 
     onMount(async () => {
-        const res = await fetch('http://127.0.0.1:8080/list');
+        const res = await fetch(`http://127.0.0.1:${import.meta.env.VITE_SERVER_PORT}/list`);
         messageList = await res.json();
-        console.log(messageList)
         messages.set(messageList)
     });
 
