@@ -11,6 +11,7 @@
     onMount(async () => {
         const res = await fetch('http://127.0.0.1:8080/list');
         messageList = await res.json();
+        console.log(messageList)
         messages.set(messageList)
     });
 
@@ -21,7 +22,7 @@
 <h2>Messages:</h2>
 {#each messageList as msg}
     <div class="message">
-         <p class="sender">{msg.sender}:</p>
+         <p><span class="sender">{msg.sender}</span> (<span class="msg-time">{msg.time}</span>):</p>
          <p class="msg-content">{msg.content}</p>
     </div>
 {/each}

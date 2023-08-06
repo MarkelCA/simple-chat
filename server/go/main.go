@@ -5,17 +5,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
+
 	"github.com/gorilla/websocket"
 )
+
+type Marshaler interface {
+    MarshalJSON() ([]byte, error)
+}
+type JSONTime time.Time
+
+func (t JSONTime)MarshalJSON() ([]byte, error) {
+    //do your serializing here
+    stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format("2006-01-02 15:04:05"))
+    return []byte(stamp), nil
+}
 
 var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan Message)
 var upgrader = websocket.Upgrader{
     CheckOrigin: customUpgrader,
-}
-var allowedHosts = map[string]bool{
-    "127.0.0.1": true,
-    "localhost": true,
 }
 // Just for local envs. It should not return always true on production applications.
 // https://pkg.go.dev/github.com/gorilla/websocket?utm_source=godoc#hdr-Origin_Considerations
@@ -27,9 +36,21 @@ var customUpgrader = func(r *http.Request) bool {
 type Message struct {
     Sender  string `json:"sender"`
     Content string `json:"content"`
+    Time JSONTime `json:"time"`
 }
 
-var messages = []Message{{"markelca", "foo"}, {"johnhoo", "rustacean"}}
+var messages = []Message{
+    {
+        Sender  : "markelca", 
+        Content : "foo", 
+        Time    : JSONTime(time.Now()),
+    }, 
+    {
+        Sender  : "johnhoo", 
+        Content : "rustacean", 
+        Time    : JSONTime(time.Now()),
+    },
+}
 
 func main() {
     http.HandleFunc("/list", listMessages)
@@ -63,6 +84,8 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     for {
         var msg Message
         err := conn.ReadJSON(&msg)
+        msg.Time = JSONTime(time.Now())
+        log.Printf("debug: %v", msg)
         log.Printf("Message received: %v", msg)
         if err != nil {
             log.Println("Error reading message:", err)
