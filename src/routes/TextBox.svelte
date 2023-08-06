@@ -3,12 +3,9 @@
     import { get } from 'svelte/store';
     import {messages, username} from './stores.js'
     export let messageContent: string = ""
-
     let socket
 
-
     onMount(() => {
-        console.log(WebSocket)
         socket = new WebSocket("ws://localhost:8080/add");
         socket.addEventListener("message", (event) => {
             messages.update((currentValue) =>{
@@ -21,6 +18,7 @@
             console.error("Error from server:", event.data);
         });
 
+        document.getElementById("message-input").focus();
     });
 
     function sendMessage() {
@@ -28,20 +26,17 @@
             alert("The message content can't be null")
             return
         }
+
         const message = {
             'sender' : get(username),
             'content': messageContent
         }
 
         socket.send(JSON.stringify(message));
-
-        // messages.update((currentValue) => [...currentValue, message])
-        // messageContent = ""
-        //
-        // socket.emit('message', 'Hello from Svelte!');
-
     }
 </script>
 
-<input placeholder="Type your message..." bind:value={messageContent} />
-<button on:click={sendMessage}>Send</button>
+<form id="message-form">
+    <input id="message-input" placeholder="Type your message..." bind:value={messageContent} />
+    <button on:click={sendMessage}>Send</button>
+</form>
