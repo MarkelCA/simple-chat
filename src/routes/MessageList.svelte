@@ -9,8 +9,9 @@
     })
 
     onMount(async () => {
-        const res = await fetch('http://127.0.0.1:8000/list');
+        const res = await fetch('http://127.0.0.1:8080/list');
         messageList = await res.json();
+        messages.set(messageList)
     });
 
 

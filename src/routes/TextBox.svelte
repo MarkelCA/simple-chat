@@ -2,28 +2,25 @@
     import { onMount } from 'svelte';
     import { get } from 'svelte/store';
     import {messages, username} from './stores.js'
-    import io from 'socket.io-client';
-    let socket;
-
     export let messageContent: string = ""
 
+    let socket
+
+
     onMount(() => {
-        console.log('mounted')
-        // Connect to your localhost server here
-        socket = io('http://localhost:8080');
-        console.log(socket)
-
-        // Optional: Add event listeners for various Socket.io events
-        socket.on('connect', () => {
-            console.log('Connected to server');
+        console.log(WebSocket)
+        socket = new WebSocket("ws://localhost:8080/add");
+        socket.addEventListener("message", (event) => {
+            messages.update((currentValue) =>{
+                const newMessage = JSON.parse(event.data)
+                return [...currentValue, newMessage]
+            })
         });
 
-        socket.on('message', (data) => {
-            console.log('Received message:', data);
+        socket.addEventListener("error", (event) => {
+            console.error("Error from server:", event.data);
         });
-        socket.on("connect_error", (err) => {
-            console.error(err);
-        })
+
     });
 
     function sendMessage() {
@@ -36,10 +33,12 @@
             'content': messageContent
         }
 
-        messages.update((currentValue) => [...currentValue, message])
-        messageContent = ""
+        socket.send(JSON.stringify(message));
 
-        socket.emit('message', 'Hello from Svelte!');
+        // messages.update((currentValue) => [...currentValue, message])
+        // messageContent = ""
+        //
+        // socket.emit('message', 'Hello from Svelte!');
 
     }
 </script>
