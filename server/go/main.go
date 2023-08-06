@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
-
+    "os"
 	"github.com/gorilla/websocket"
 )
 
@@ -52,11 +52,16 @@ var messages = []Message{
     },
 }
 
+var port = os.Getenv("PORT")
+
 func main() {
+    log.Printf("Env port %v", port)
     http.HandleFunc("/list", listMessages)
     http.HandleFunc("/add", handleWebSocket)
     go handleMessages()
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Printf("Starting server on localhost:%v...", port)
+    hostStr := fmt.Sprintf(":%v", port)
+    log.Fatal(http.ListenAndServe(hostStr, nil))
 }
 
 func listMessages(w http.ResponseWriter, r *http.Request)  {

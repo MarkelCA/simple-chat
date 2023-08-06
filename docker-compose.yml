@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  go-server:
+    image: simple-chat-go-server
+    container_name: simple-chat-go-server
+    build: ./server/go
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    environment:
+      - PORT=${SERVER_PORT}
+
+
+  # rust-server:
+  #   image: simple-chat-go-server
+  #   container_name: simple-chat-rust-server
+  #   ports:
+  #     - ${SERVER_PORT}:${SERVER_PORT}
+  #   environment:
+  #     - PORT=${SERVER_PORT}

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+    echo "Usage: start-server <go|rust>"
+    exit 1
+fi
+
+if [ "$1" == "go" ]; then
+    service="go-server"
+elif [ "$1" == "rust" ]; then
+    service="rust-server"
+    echo "Not implemented yet!"
+    exit 1
+else
+    echo "Option not valid! Should be one of the following (go, rust)"
+    exit 1
+fi
+
+docker compose up --build $service

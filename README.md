@@ -1,38 +1,30 @@
-# create-svelte
+# simple-chat
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+## Dependencies
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Because it uses the new `docker compose up` command).
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
+## Init
+### 1. Clone the repo
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+git clone https://github.com/MarkelCA/simple-chat
+cd simple-chat
 ```
+### 2. Create the envs file
+*(From the root folder)*
+```bash
+cp .env.sample .env
+```
+Edit the .envs file with the desired parameters
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Frontend
+(From the root folder)
 
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
-
-To create a production version of your app:
-
+## Backend
+There's a script to run the backend server.
 ```bash
-npm run build
+./start-server <go|rust>
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
